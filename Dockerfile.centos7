@@ -1,0 +1,31 @@
+FROM centos:7
+
+USER root
+
+ENV USER builder
+RUN adduser -U $USER
+
+RUN curl -O -L http://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
+
+#RUN cd /etc/yum.repos.d && curl -O -L http://download.eng.rdu2.redhat.com/rel-eng/RCMTOOLS/rcm-tools-rhel-7-server.repo && curl -O -L https://copr.fedorainfracloud.org/coprs/g/maistra/bazel/repo/epel-7/group_maistra-bazel-epel-7.repo
+
+RUN yum install -y centos-release-scl && yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+#RUN cd /etc/yum.repos.d && curl -O -L http://download.eng.rdu2.redhat.com/rel-eng/RCMTOOLS/rcm-tools-rhel-7-server.repo && curl -O -L https://copr.fedorainfracloud.org/coprs/g/maistra/bazel/repo/epel-7/group_maistra-bazel-epel-7.repo
+
+#RUN yum install -y centos-release-scl && yum-config-manager --enable rhel-server-rhscl-7-rpms && yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+RUN yum install -y ninja-build devtoolset-4-gcc devtoolset-4-gcc-c++ devtoolset-4-binutils \
+    devtoolset-4-libatomic-devel devtoolset-4-libstdc++-devel devtoolset-4-runtime \
+    libtool golang automake autoconf m4 perl binutils cmake3 
+
+RUN ln -s /usr/bin/ninja-build /usr/bin/ninja
+
+RUN mkdir /root/bin && ln -s /usr/bin/cmake3 /root/bin/cmake
+
+RUN yum install -y which ksh make vim unzip patch
+
+RUN chmod 777 bazel-0.22.0-installer-linux-x86_64.sh
+RUN ./bazel-0.22.0-installer-linux-x86_64.sh
+
+RUN yum -y install libstdc++-devel

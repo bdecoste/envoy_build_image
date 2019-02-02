@@ -1,0 +1,35 @@
+FROM rhel7:latest
+
+USER root
+
+ENV USER builder
+RUN adduser -U $USER
+
+RUN curl -O -L http://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
+
+ADD epel.repo /etc/yum.repos.d/
+
+RUN yum-config-manager --enable epel --enable rhel-server-rhscl-7-rpms --enable rhel-7-server-devtools-rpms --enable rhel-7-server-rpms --enable rhel-7-server-devtools-rpms  
+
+RUN yum -y install openssl-devel git gcc
+ADD golang-1.11.2-1.el7.x86_64.rpm /root
+ADD golang-src-1.11.2-1.el7.x86_64.rpm /root
+ADD golang-bin-1.11.2-1.el7.x86_64.rpm /root
+RUN cd /root && rpm -iv golang-1.11.2-1.el7.x86_64.rpm golang-src-1.11.2-1.el7.x86_64.rpm golang-bin-1.11.2-1.el7.x86_64.rpm
+
+RUN yum -y install vim-filesystem emacs-filesystem
+ADD ninja-build-1.8.2-1.el7.x86_64.rpm /root
+RUN cd /root && rpm -iv ninja-build-1.8.2-1.el7.x86_64.rpm
+
+RUN yum install -y devtoolset-4-gcc devtoolset-4-gcc-c++ \
+    devtoolset-4-libatomic-devel devtoolset-4-libstdc++-devel devtoolset-4-runtime \
+    libtool automake autoconf m4 perl binutils \
+    llvm-toolset-7-cmake llvm-toolset-7-runtime llvm-toolset-7-cmake-data
+
+RUN yum install -y which ksh make vim unzip patch
+
+RUN chmod 777 bazel-0.22.0-installer-linux-x86_64.sh
+RUN ./bazel-0.22.0-installer-linux-x86_64.sh
+
+RUN yum -y install libstdc++-devel
+
